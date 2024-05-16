@@ -1,0 +1,16 @@
+{
+    "products": {
+        "product1" : {
+            "id" : 1478,
+            "name" : "mouse",
+            "category" : "pet",
+            "description" : "not a pc-componet"
+        },
+        "product2" : {
+            "id" : 7814,
+            "name" : "mouse",
+            "category" : "pc-component",
+            "description" : "not a pet"
+        }
+    }
+}
