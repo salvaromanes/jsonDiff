@@ -192,4 +192,43 @@ class DiffTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
+  "Two different json with a list inside a nested object" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : {
+        |    "list" : ["a"],
+        |    "second" : "zubehor"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : {
+        |    "list" : ["a","b"],
+        |    "second" : "cats"
+        |  }
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(("first", Json.arr(
+            Json.obj(("list", Json.arr())),
+            Json.obj(("second", Json.fromString("zubehor"))
+            )))
+          ),
+          Json.obj(("first", Json.arr(
+            Json.obj(("list", Json.arr(Json.fromString("b")))),
+            Json.obj(("second", Json.fromString("cats"))
+            )))
+          )
+        )))
+    }
+
+    actual shouldBe expected
+  }
+
 }

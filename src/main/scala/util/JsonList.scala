@@ -5,6 +5,8 @@ import util.Diff._
 
 object JsonList {
 
+  //It doesn't work correctly if there are nested objects inside the list
+
   def differencesBetweenJsonList(
                                   jsonList1: Json,
                                   jsonList2: Json,
