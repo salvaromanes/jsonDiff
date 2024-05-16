@@ -6,15 +6,15 @@ object Main extends App {
     """{
       |  "list" : [{
       |    "first" : "zubehor",
-      |    "second" : "zubehor"
+      |    "second" : ["zubehor"]
       |  }]
       |}""".stripMargin
 
   private val entryJson2 =
     """{
       |  "list" : [{
-      |    "first" : "zubehor",
-      |    "second" : "cats"
+      |    "first" : "cats",
+      |    "second" : ["cats"]
       |  }]
       |}""".stripMargin
 
