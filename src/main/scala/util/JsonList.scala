@@ -37,7 +37,11 @@ object JsonList {
   }
 
   @tailrec
-  private def buildOutJson(iterable: Iterable[(Json, Json)])(outJson: (Json, Json)): (Json, Json) = iterable.toList match {
+  private def buildOutJson(
+                            iterable: Iterable[(Json, Json)]
+                          )(
+                            outJson: (Json, Json)
+                          ): (Json, Json) = iterable.toList match {
     case Nil =>
       outJson
     case head::tail =>
@@ -50,7 +54,9 @@ object JsonList {
       }
   }
 
-  private def isNested(iterable: Iterable[Json]): Boolean = {
+  private def isNested(
+                        iterable: Iterable[Json]
+                      ): Boolean = {
     val noNested = iterable.forall(elem => elem.isNumber || elem.isString)
     !noNested
   }
