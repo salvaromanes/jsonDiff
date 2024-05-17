@@ -25,8 +25,10 @@ object Diff {
     outputJson match {
       case Left(error) => Json.fromString(error.getMessage())
       case Right(value) =>
-        if(value._1.isNull && value._2.isNull) Json.obj(("Differences", Json.fromString("No differences")))
-        else JsonKeysValues("Differences", Json.arr(value._1, value._2)).toJson
+        if(value._1.isNull && value._2.isNull)
+          Json.obj(("Differences", Json.fromString("No differences")))
+        else
+          JsonKeysValues("Differences", Json.arr(value._1, value._2)).toJson
     }
   }
 
@@ -50,7 +52,7 @@ object Diff {
   }
 
   @tailrec
-  def createSolution(
+  private def createSolution(
                       keys: List[String],
                       cursor1: HCursor,
                       cursor2: HCursor
@@ -64,29 +66,44 @@ object Diff {
 
       (data1, data2) match {
         case (Right(value1), Right(value2)) if value1 != value2 =>
-          if (shouldContinueSearchingBottomJson(value1) && shouldContinueSearchingBottomJson(value2))
-            differencesBetweenNestedObjects(value1, value2, tail, cursor1, cursor2)(jsonSolution)
-          else
-            differencesBetweenJsonList(value1, value2, head, tail, cursor1, cursor2)(jsonSolution)
-        case (Right(value1), _) =>
-          solutionMaker(jsonSolution, tail, cursor1, cursor2, JsonKeysValues(head, value1).toJson, JsonKeysValues(head, Json.Null).toJson)
-        case (_, Right(value2)) =>
-          solutionMaker(jsonSolution, tail, cursor1, cursor2, JsonKeysValues(head, Json.Null).toJson, JsonKeysValues(head, value2).toJson)
+          val maybeList = {
+            for{
+              maybeList1 <- value1.asArray
+              maybeList2 <- value2.asArray
+            } yield {
+              differencesBetweenJsonList(maybeList1, maybeList2)
+            }
+          }
+
+          maybeList match {
+            case Some(value) =>
+              val json1 = JsonKeysValues(head, value._1).toJson
+              val json2 = JsonKeysValues(head, value._2).toJson
+
+              solutionMaker(jsonSolution, tail, cursor1, cursor2, json1, json2)
+            case None =>
+              val nestedDifferences = differencesBetweenNestedObjects(value1, value2)
+              val json1 = JsonKeysValues(head, nestedDifferences._1).toJson
+              val json2 = JsonKeysValues(head, nestedDifferences._2).toJson
+
+              solutionMaker(jsonSolution, tail, cursor1, cursor2, json1, json2)
+          }
+        case (Right(value1), Left(_)) =>
+          val json1 = JsonKeysValues(head, value1).toJson
+          val json2 = JsonKeysValues(head, Json.Null).toJson
+
+          solutionMaker(jsonSolution, tail, cursor1, cursor2, json1, json2)
+        case (Left(_), Right(value2)) =>
+          val json1 = JsonKeysValues(head, Json.Null).toJson
+          val json2 = JsonKeysValues(head, value2).toJson
+
+          solutionMaker(jsonSolution, tail, cursor1, cursor2, json1, json2)
         case _ =>
           createSolution(tail, cursor1, cursor2)(jsonSolution)
       }
   }
 
-  def shouldContinueSearchingBottomJson(
-                           value: Json
-                         ): Boolean = {
-    value.asString match {
-      case None => false
-      case Some(value) => value.contains("{") && value.contains("}")
-    }
-  }
-
-  def solutionMaker(
+  private def solutionMaker(
                              jsonSolution: (Json, Json),
                              tail: List[String],
                              cursor1: HCursor,
@@ -97,7 +114,10 @@ object Diff {
     if (jsonSolution._1.isNull && jsonSolution._2.isNull) {
       createSolution(tail, cursor1, cursor2)(json1, json2)
     } else {
-      createSolution(tail, cursor1, cursor2)(Json.arr(jsonSolution._1, json1), Json.arr(jsonSolution._2, json2))
+      val jsonSolution1 = json1.deepMerge(jsonSolution._1)
+      val jsonSolution2 = json2.deepMerge(jsonSolution._2)
+
+      createSolution(tail, cursor1, cursor2)(jsonSolution1, jsonSolution2)
     }
   }
 

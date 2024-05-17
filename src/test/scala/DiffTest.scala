@@ -31,6 +31,41 @@ class DiffTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
+  "Two different json with several fields" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : "zubehor",
+        |  "second" : "zubehor",
+        |  "third" : "zubehor"
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : "cats",
+        |  "second" : "zubehor"
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+              ("first",Json.fromString("zubehor")),
+              ("third",Json.fromString("zubehor"))
+          ),
+          Json.obj(
+              ("first",Json.fromString("cats")),
+              ("third",Json.Null)
+          )
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
   "Two different json with a nested object" should
     "return a Json with the differences between both" in {
     val entryJson1 =
@@ -67,6 +102,50 @@ class DiffTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
+  "Two different json with several nested objects" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : {
+        |    "second" : "zubehor"
+        |  },
+        |  "second" : {
+        |    "second" : "zubehor"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : {
+        |    "second" : "zubehor"
+        |  },
+        |  "second" : {
+        |    "second" : "cats"
+        |  }
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("second",Json.obj(
+              ("second", Json.fromString("zubehor"))
+            ))
+          ),
+          Json.obj(
+            ("second",Json.obj(
+              ("second", Json.fromString("cats"))
+            ))
+          )
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
   "Two different json with a field and a nested object" should
     "return a Json with the differences between both" in {
     val entryJson1 =
@@ -90,14 +169,16 @@ class DiffTest extends AnyFlatSpec with Matchers {
     val expected = {
       Json.obj(
         ("Differences", Json.arr(
-          Json.arr(Json.obj(("some", Json.fromString("thing"))),
-          Json.obj(("first", Json.obj(
-            ("second", Json.fromString("zubehor"))
-          )))),
-          Json.arr(Json.obj(("some", Json.fromString("any"))),
-          Json.obj(("first", Json.obj(
-            ("second", Json.fromString("cats"))
-          ))))
+          Json.obj(
+            ("some", Json.fromString("thing")),
+            ("first", Json.obj(
+              ("second", Json.fromString("zubehor"))
+          ))),
+          Json.obj(
+            ("some", Json.fromString("any")),
+            ("first", Json.obj(
+              ("second", Json.fromString("cats"))
+          )))
         ))
       )
     }
@@ -174,19 +255,96 @@ class DiffTest extends AnyFlatSpec with Matchers {
     val expected = {
       Json.obj(
         ("Differences", Json.arr(
-          Json.arr(
-            Json.obj(("list", Json.arr())),
-            Json.obj(("first", Json.obj(
-                ("second", Json.fromString("zubehor"))
-              )))
+          Json.obj(
+            ("list", Json.arr()),
+            ("first", Json.obj(
+              ("second", Json.fromString("zubehor"))
+            ))
           ),
-          Json.arr(
-              Json.obj(("list", Json.fromValues(Array(Json.fromString("b"))))),
-              Json.obj(("first", Json.obj(
-                ("second", Json.fromString("cats"))
-              )))
+          Json.obj(
+            ("list", Json.fromValues(Array(Json.fromString("b")))),
+            ("first", Json.obj(
+              ("second", Json.fromString("cats"))
+          )))
+        )
+      ))
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two different json with a list inside a nested object" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : {
+        |    "list" : ["a"],
+        |    "second" : "zubehor"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : {
+        |    "list" : ["a","b"],
+        |    "second" : "cats"
+        |  }
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("first", Json.obj(
+              ("list", Json.arr()),
+              ("second", Json.fromString("zubehor"))
+            ))
+          ),
+          Json.obj(
+            ("first", Json.obj(
+              ("list", Json.arr(Json.fromString("b"))),
+              ("second", Json.fromString("cats"))
+            )
+          ))
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two different json with several list" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : ["zubehor"],
+        |  "second" : ["zubehor"],
+        |  "third" : ["zubehor"]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : ["cats"],
+        |  "second" : ["zubehor"]
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("first",Json.arr(Json.fromString("zubehor"))),
+            ("third",Json.arr(Json.fromString("zubehor")))
+          ),
+          Json.obj(
+            ("first",Json.arr(Json.fromString("cats"))),
+            ("third",Json.Null)
           )
-      )))
+        ))
+      )
     }
 
     actual shouldBe expected
