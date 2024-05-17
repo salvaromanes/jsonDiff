@@ -71,10 +71,7 @@ object Diff {
               maybeList1 <- value1.asArray
               maybeList2 <- value2.asArray
             } yield {
-              val jsonList1 = Json.fromValues(maybeList1)
-              val jsonList2 = Json.fromValues(maybeList2)
-
-              differencesBetweenJsonList(jsonList1, jsonList2)
+              differencesBetweenJsonList(maybeList1, maybeList2)
             }
           }
 

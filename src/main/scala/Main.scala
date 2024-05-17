@@ -2,19 +2,19 @@ import util.Diff.diff
 
 object Main extends App {
 
-  private val entryJson1 =
+  val entryJson1 =
     """{
-      |  "list" : [{
-      |    "first" : "zubehor",
-      |    "second" : ["zubehor"]
+      |  "first" : [{
+      |    "second" : "zubehor",
+      |    "third" : "zubehor"
       |  }]
       |}""".stripMargin
 
-  private val entryJson2 =
+  val entryJson2 =
     """{
-      |  "list" : [{
-      |    "first" : "cats",
-      |    "second" : ["cats"]
+      |  "first" : [{
+      |    "second" : "zubehor",
+      |    "third" : "cats"
       |  }]
       |}""".stripMargin
 
