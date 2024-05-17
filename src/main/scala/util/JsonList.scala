@@ -42,13 +42,4 @@ object JsonList {
     }
   }
 
-//  private def isNestedObject(json: Json): Boolean = {
-//    val keys = json.hcursor.keys
-//
-//    keys match {
-//      case None => false
-//      case Some(_) => true
-//    }
-//  }
-
 }

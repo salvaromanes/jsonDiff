@@ -117,8 +117,8 @@ object Diff {
     if (jsonSolution._1.isNull && jsonSolution._2.isNull) {
       createSolution(tail, cursor1, cursor2)(json1, json2)
     } else {
-      val jsonSolution1 = Json.arr(jsonSolution._1, json1)
-      val jsonSolution2 = Json.arr(jsonSolution._2, json2)
+      val jsonSolution1 = json1.deepMerge(jsonSolution._1)
+      val jsonSolution2 = json2.deepMerge(jsonSolution._2)
 
       createSolution(tail, cursor1, cursor2)(jsonSolution1, jsonSolution2)
     }
