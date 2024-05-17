@@ -58,7 +58,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
           Json.obj(
               ("first",Json.fromString("cats")),
               ("third",Json.Null)
-          ),
+          )
         ))
       )
     }
@@ -96,6 +96,50 @@ class DiffTest extends AnyFlatSpec with Matchers {
               ))
             ))
         )
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two different json with several nested objects" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : {
+        |    "second" : "zubehor"
+        |  },
+        |  "second" : {
+        |    "second" : "zubehor"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : {
+        |    "second" : "zubehor"
+        |  },
+        |  "second" : {
+        |    "second" : "cats"
+        |  }
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("second",Json.obj(
+              ("second", Json.fromString("zubehor"))
+            ))
+          ),
+          Json.obj(
+            ("second",Json.obj(
+              ("second", Json.fromString("cats"))
+            ))
+          )
+        ))
       )
     }
 
@@ -264,6 +308,41 @@ class DiffTest extends AnyFlatSpec with Matchers {
               ("second", Json.fromString("cats"))
             )
           ))
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two different json with several list" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : ["zubehor"],
+        |  "second" : ["zubehor"],
+        |  "third" : ["zubehor"]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : ["cats"],
+        |  "second" : ["zubehor"]
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("first",Json.arr(Json.fromString("zubehor"))),
+            ("third",Json.arr(Json.fromString("zubehor")))
+          ),
+          Json.obj(
+            ("first",Json.arr(Json.fromString("cats"))),
+            ("third",Json.Null)
+          )
         ))
       )
     }
