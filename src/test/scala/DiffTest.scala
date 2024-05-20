@@ -350,4 +350,108 @@ class DiffTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
+  "Two different json list of nested objects" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : [{
+        |    "second" : "zubehor",
+        |    "third" : "zubehor"
+        |  }]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : [{
+        |    "second" : "zubehor",
+        |    "third" : "cats"
+        |  }]
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(("first",
+            Json.obj(("third",Json.fromString("zubehor")))
+          )),
+          Json.obj(("first",
+            Json.obj(("third",Json.fromString("cats")))
+          ))
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two list with the same nested object inside" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : [{
+        |    "second" : "zubehor",
+        |    "third" : "zubehor"
+        |  }]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : [{
+        |    "second" : "zubehor",
+        |    "third" : "zubehor"
+        |  }]
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.fromString("No differences"))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "A list with a nested object inside and a field" should
+    "return a Json with the differences between both" in {
+    val entryJson1 =
+      """{
+        |  "first" : [{
+        |    "second" : "zubehor",
+        |    "third" : "zubehor"
+        |  }]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "lorem" : "ipsum"
+        |}""".stripMargin
+
+    val actual = Diff.diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Differences", Json.arr(
+          Json.obj(
+            ("first", Json.arr(
+              Json.obj(
+                ("second", Json.fromString("zubehor")),
+                ("third", Json.fromString("zubehor")))
+            )),
+            ("lorem", Json.Null)
+          ),
+          Json.obj(
+            ("first", Json.Null),
+            ("lorem", Json.fromString("ipsum"))
+          )
+        ))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
 }

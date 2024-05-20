@@ -12,10 +12,7 @@ object Main extends App {
 
   val entryJson2 =
     """{
-      |  "first" : [{
-      |    "second" : "zubehor",
-      |    "third" : "cats"
-      |  }]
+      |  "lorem" : "ipsum"
       |}""".stripMargin
 
   println(diff(entryJson1, entryJson2))
