@@ -18,6 +18,7 @@ object JsonList {
     val valueInsideJsonList2 = jsonlist2.hcursor.values.get
 
     if(isNested(valueInsideJsonList1) && isNested(valueInsideJsonList2)) {
+      //val itJson = compareTwoIterables(valueInsideJsonList1, valueInsideJsonList2)(Iterable())
       val itJson =
         for {
           it1 <- valueInsideJsonList1
@@ -26,8 +27,7 @@ object JsonList {
           diff2Json(it1.hcursor, it2.hcursor)
         }
 
-      val emptyJson = (Json.Null, Json.Null)
-      buildOutJson(itJson)(emptyJson)
+      buildOutJson(itJson)(Json.Null, Json.Null)
     } else {
       val diff1 = list1.diff(list2)
       val diff2 = list2.diff(list1)
@@ -35,6 +35,22 @@ object JsonList {
       (Json.fromValues(diff1), Json.fromValues(diff2))
     }
   }
+
+//  @tailrec
+//  private def compareTwoIterables(
+//                                   iterable: (Iterable[Json], Iterable[Json])
+//                                 )(
+//                                   outputIterable: Iterable[(Json, Json)]
+//                                 ): Iterable[(Json, Json)] = iterable match {
+//    case (Nil, Nil) =>
+//      outputIterable
+//    case (head::tail, Nil) =>
+//      compareTwoIterables(tail, Nil)(outputIterable.concat(Iterable((head, Json.Null))))
+//    case (Nil, head::tail) =>
+//      compareTwoIterables(Nil, tail)(outputIterable.concat(Iterable((Json.Null, head))))
+//    case (head1::tail1, head2::tail2) =>
+//      compareTwoIterables(tail1, tail2)(outputIterable.concat(Iterable(diff2Json(head1.hcursor, head2.hcursor))))
+//  }
 
   @tailrec
   private def buildOutJson(
@@ -46,10 +62,11 @@ object JsonList {
       outJson
     case head::tail =>
       if(outJson._1.isNull && outJson._2.isNull) {
-        val solution = (head._1, head._2)
+        val solution = diff2Json(head._1.hcursor, head._2.hcursor)
         buildOutJson(tail)(solution)
       } else {
-        val solution = (outJson._1.deepMerge(head._1), outJson._2.deepMerge(head._2))
+        val diffs = diff2Json(head._1.hcursor, head._2.hcursor)
+        val solution = (outJson._1.deepMerge(diffs._1), outJson._2.deepMerge(diffs._2))
         buildOutJson(tail)(solution)
       }
   }
