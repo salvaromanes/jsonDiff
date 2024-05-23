@@ -1,7 +1,7 @@
 import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import diffWithJson4s._
+import json4s.Diff2Json._
 
 class DiffTest extends AnyFlatSpec with Matchers {
 
@@ -90,7 +90,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
-  // Different things inside json bodies
+  // Differences inside json bodies
 
   "Two json with a different field" should
     "return a no differences Json" in {
@@ -111,6 +111,60 @@ class DiffTest extends AnyFlatSpec with Matchers {
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
         ("Changes", Json.fromString("Map(first -> third)"))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two json with a different list" should
+    "return a no differences Json" in {
+    val entryJson1 =
+      """{
+        |  "first" : ["second"]
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : ["third"]
+        |}""".stripMargin
+
+    val actual = diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Added", Json.fromString("Nothing")),
+        ("Deleted", Json.fromString("Nothing")),
+        ("Changes", Json.fromString("Map(first -> third)"))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two json with a different nested object" should
+    "return a no differences Json" in {
+    val entryJson1 =
+      """{
+        |  "first" : {
+        |    "second" : "hello"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "first" : {
+        |    "second" : "bye"
+        |  }
+        |}""".stripMargin
+
+    val actual = diff(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Added", Json.fromString("Nothing")),
+        ("Deleted", Json.fromString("Nothing")),
+        ("Changes", Json.fromString("Map(first -> Map(second -> bye))"))
       )
     }
 
