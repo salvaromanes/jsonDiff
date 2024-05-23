@@ -1,4 +1,4 @@
-import diffWithJson4s._
+import json4s.Diff2Json._
 
 object Main extends App {
 
