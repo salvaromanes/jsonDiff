@@ -1,9 +1,9 @@
+import diffson.DiffDiffson.diffDiffson
 import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import json4s.DiffJson4s._
 
-class DiffTest extends AnyFlatSpec with Matchers {
+class DiffTestDiffson extends AnyFlatSpec with Matchers{
 
   // Same things inside json bodies
 
@@ -19,14 +19,10 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : "second"
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
-      )
+      Json.arr()
     }
 
     actual shouldBe expected
@@ -48,14 +44,10 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  ]
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
-      )
+      Json.arr()
     }
 
     actual shouldBe expected
@@ -77,14 +69,10 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
-      )
+      Json.arr()
     }
 
     actual shouldBe expected
@@ -104,13 +92,15 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : "third"
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> third)"))
+      Json.arr(
+        Json.obj(
+          ("op", Json.fromString("replace")),
+          ("path", Json.fromString("/first")),
+          ("value", Json.fromString("third"))
+        )
       )
     }
 
@@ -129,13 +119,15 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : ["third"]
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> third)"))
+      Json.arr(
+        Json.obj(
+          ("op", Json.fromString("replace")),
+          ("path", Json.fromString("/first/0")),
+          ("value", Json.fromString("third"))
+        )
       )
     }
 
@@ -158,13 +150,15 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = diffJson4s(entryJson1, entryJson2)
+    val actual = diffDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(
-        ("Added", Json.fromString("Nothing")),
-        ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> Map(second -> bye))"))
+      Json.arr(
+        Json.obj(
+          ("op", Json.fromString("replace")),
+          ("path", Json.fromString("/first/second")),
+          ("value", Json.fromString("bye"))
+        )
       )
     }
 
