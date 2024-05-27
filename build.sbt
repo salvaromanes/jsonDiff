@@ -15,6 +15,8 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-core" % "4.0.7",
   "org.json4s" %% "json4s-native" % "4.0.7",
 
+  "org.gnieh" %% "diffson-circe" % "4.6.0",
+
   "org.scalatest" %% "scalatest" % "3.2.18" % Test,
 
 //libraryDependencies += "org.gnieh" %% "diffson-circe" % "4.6.0"

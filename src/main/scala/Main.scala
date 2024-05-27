@@ -1,4 +1,5 @@
-import json4s.Diff2Json._
+import diffson.DiffDiffson.diffDiffson
+import json4s.DiffJson4s._
 
 object Main extends App {
 
@@ -12,6 +13,7 @@ object Main extends App {
       |  "first" : "third"
       |}""".stripMargin
 
-  println(diff(entryJson1, entryJson2))
+  println(diffJson4s(entryJson1, entryJson2))
+  println(diffDiffson(entryJson1, entryJson2))
 
 }

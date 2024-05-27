@@ -4,9 +4,9 @@ import io.circe.Json
 import org.json4s.JsonAST.JValue
 import org.json4s.native.JsonMethods._
 
-object Diff2Json {
+object DiffJson4s {
 
-  def diff(
+  def diffJson4s(
             text1: String,
             text2: String
           ): Json = {

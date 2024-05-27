@@ -1,7 +1,7 @@
 import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import json4s.Diff2Json._
+import json4s.DiffJson4s._
 
 class DiffTest extends AnyFlatSpec with Matchers {
 
@@ -19,7 +19,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : "second"
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
@@ -48,7 +48,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  ]
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
@@ -77,7 +77,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
@@ -104,7 +104,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : "third"
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
@@ -129,7 +129,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  "first" : ["third"]
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
@@ -158,7 +158,7 @@ class DiffTest extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = diff(entryJson1, entryJson2)
+    val actual = diffJson4s(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
