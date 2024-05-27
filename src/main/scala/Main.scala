@@ -5,12 +5,16 @@ object Main extends App {
 
   val entryJson1 =
     """{
-      |  "first" : "second"
+      |  "first" : {
+      |    "second" : "hello"
+      |  }
       |}""".stripMargin
 
   val entryJson2 =
     """{
-      |  "first" : "third"
+      |  "first" : {
+      |    "second" : "bye"
+      |  }
       |}""".stripMargin
 
   println(diffJson4s(entryJson1, entryJson2))
