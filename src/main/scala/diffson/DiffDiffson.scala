@@ -1,37 +1,35 @@
 package diffson
 
-import diffson.lcs._
 import diffson.circe._
-import diffson.jsonpatch._
-import diffson.jsonpatch.lcsdiff._
+import diffson.jsonmergepatch._
 
 import io.circe._
 import io.circe.parser._
 
 object DiffDiffson {
 
-  def diffDiffson(
-                   text1: String,
-                   text2: String
-                 ): Json = {
-    implicit val lcs: Patience[Json] = new Patience[Json]
-    val encoder = Encoder[JsonPatch[Json]]
+  def buildSolutionWithDiffson(
+                                text1: String,
+                                text2: String
+                              ): Json = {
+    val maybeJson1 = parse(text1)
+    val maybeJson2 = parse(text2)
 
-    val json1 = parse(text1)
-    val json2 = parse(text2)
-
-    val patch =
-      for {
-        json1 <- json1
-        json2 <- json2
-      } yield diff(json1, json2)
-
-    patch match {
-      case Left(error) =>
-        Json.fromString(error.getMessage())
-      case Right(value) =>
-        encoder(value)
+    (maybeJson1, maybeJson2) match {
+      case (Right(v1), Right(v2)) =>
+        val diffs = diffDiffson(v1, v2)
+        Json.obj(("differences", diffs))
+      case _ =>
+        Json.fromString("something was wrong")
     }
+  }
+
+  private def diffDiffson(
+                   json1: Json,
+                   json2: Json
+                 ): Json = {
+    val encoder = Encoder[JsonMergePatch[Json]]
+    encoder(diff(json1, json2))
   }
 
 }

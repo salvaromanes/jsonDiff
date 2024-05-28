@@ -1,34 +1,25 @@
 package json4s
 
-import io.circe.Json
 import org.json4s.JsonAST.JValue
 import org.json4s.native.JsonMethods._
+import org.json4s.{JNull, JObject}
 
 object DiffJson4s {
 
   def diffJson4s(
-            text1: String,
-            text2: String
-          ): Json = {
+      text1: String,
+      text2: String
+  ): JValue = {
     val json1 = parse(text1)
     val json2 = parse(text2)
 
-    val changedJson = buildJsonFromJValues((json1 diff json2).changed, "Changed")
-    val deletedJson = buildJsonFromJValues((json1 diff json2).deleted, "Deleted")
-    val addedJson = buildJsonFromJValues((json1 diff json2).added, "Added")
+    val diffJson = json1 diff json2
 
-    changedJson.deepMerge(deletedJson.deepMerge(addedJson))
+    val addedJson = JObject("added" -> diffJson.added.toOption.getOrElse(JNull))
+    val changedJson = JObject("changed" -> diffJson.changed.toOption.getOrElse(JNull))
+    val deletedJson = JObject("deleted" -> diffJson.deleted.toOption.getOrElse(JNull))
+
+    addedJson.merge(changedJson).merge(deletedJson)
   }
-
-  private def buildJsonFromJValues(
-                                    elem: JValue,
-                                    text: String
-                                  ): Json =
-    elem.toOption match {
-      case None =>
-        Json.obj((text, Json.fromString("Nothing")))
-      case Some(value) =>
-        Json.obj((text, Json.fromString(value.values.toString)))
-    }
 
 }

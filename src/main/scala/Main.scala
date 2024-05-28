@@ -1,32 +1,29 @@
-import diffson.DiffDiffson.diffDiffson
-import json4s.DiffJson4s._
+import diffson.DiffDiffson.buildSolutionWithDiffson
 
 object Main extends App {
 
   val entryJson1 =
     """{
-      |  "first" : "hello",
-      |  "second" : {
-      |    "second" : "hello"
-      |  }
+      |  "zero": "one",
+      |  "first": [
+      |    { "second": "a" },
+      |    { "second": "b" },
+      |    { "second": "c" },
+      |    { "second": "d" },
+      |    { "second": "e" }
+      |  ]
       |}""".stripMargin
 
   val entryJson2 =
     """{
-      |  "second" : {
-      |    "second" : "bye"
-      |  },
-      |  "third" : "bye"
+      |  "zero": "one",
+      |  "first": [
+      |    { "second": "a" },
+      |    { "second": "c" },
+      |    { "second": "e" }
+      |  ]
       |}""".stripMargin
 
-  // Differences using Json4s library -> efficient solution
-
-  println("Json4s solution:")
-  println(diffJson4s(entryJson1, entryJson2))
-
-  // Differences using Diffson library -> looks pretty and easy to read
-
-  println("Diffson solution:")
-  println(diffDiffson(entryJson1, entryJson2))
+  println(buildSolutionWithDiffson(entryJson1, entryJson2))
 
 }
