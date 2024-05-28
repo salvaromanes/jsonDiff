@@ -18,6 +18,4 @@ libraryDependencies ++= Seq(
   "org.gnieh" %% "diffson-circe" % "4.6.0",
 
   "org.scalatest" %% "scalatest" % "3.2.18" % Test,
-
-//libraryDependencies += "org.gnieh" %% "diffson-circe" % "4.6.0"
 )

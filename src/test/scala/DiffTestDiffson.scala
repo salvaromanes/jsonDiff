@@ -165,4 +165,46 @@ class DiffTestDiffson extends AnyFlatSpec with Matchers{
     actual shouldBe expected
   }
 
+  "Two json with changes, deleted and added elements" should
+    "return a no differences Json" in {
+    val entryJson1 =
+      """{
+        |  "first" : "hello",
+        |  "second" : {
+        |    "second" : "hello"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "second" : {
+        |    "second" : "bye"
+        |  },
+        |  "third" : "bye"
+        |}""".stripMargin
+
+    val actual = diffDiffson(entryJson1, entryJson2)
+
+    val expected = {
+      Json.arr(
+        Json.obj(
+          ("op", Json.fromString("remove")),
+          ("path", Json.fromString("/first"))
+        ),
+        Json.obj(
+          ("op", Json.fromString("replace")),
+          ("path", Json.fromString("/second/second")),
+          ("value", Json.fromString("bye"))
+        ),
+        Json.obj(
+          ("op", Json.fromString("add")),
+          ("path", Json.fromString("/third")),
+          ("value", Json.fromString("bye"))
+        )
+      )
+    }
+
+    actual shouldBe expected
+  }
+
 }

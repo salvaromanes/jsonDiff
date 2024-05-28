@@ -25,7 +25,7 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
+        ("Changed", Json.fromString("Nothing"))
       )
     }
 
@@ -54,7 +54,7 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
+        ("Changed", Json.fromString("Nothing"))
       )
     }
 
@@ -83,7 +83,7 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Nothing"))
+        ("Changed", Json.fromString("Nothing"))
       )
     }
 
@@ -110,7 +110,7 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> third)"))
+        ("Changed", Json.fromString("Map(first -> third)"))
       )
     }
 
@@ -135,7 +135,7 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> third)"))
+        ("Changed", Json.fromString("Map(first -> third)"))
       )
     }
 
@@ -164,7 +164,38 @@ class DiffTestJson4s extends AnyFlatSpec with Matchers {
       Json.obj(
         ("Added", Json.fromString("Nothing")),
         ("Deleted", Json.fromString("Nothing")),
-        ("Changes", Json.fromString("Map(first -> Map(second -> bye))"))
+        ("Changed", Json.fromString("Map(first -> Map(second -> bye))"))
+      )
+    }
+
+    actual shouldBe expected
+  }
+
+  "Two json with changes, deleted and added elements" should
+    "return a no differences Json" in {
+    val entryJson1 =
+      """{
+        |  "first" : "hello",
+        |  "second" : {
+        |    "second" : "hello"
+        |  }
+        |}""".stripMargin
+
+    val entryJson2 =
+      """{
+        |  "second" : {
+        |    "second" : "bye"
+        |  },
+        |  "third" : "bye"
+        |}""".stripMargin
+
+    val actual = diffJson4s(entryJson1, entryJson2)
+
+    val expected = {
+      Json.obj(
+        ("Added", Json.fromString("Map(third -> bye)")),
+        ("Deleted", Json.fromString("Map(first -> hello)")),
+        ("Changed", Json.fromString("Map(second -> Map(second -> bye))"))
       )
     }
 
