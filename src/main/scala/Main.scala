@@ -1,29 +1,29 @@
-import diffson.DiffDiffson.buildSolutionWithDiffson
+import jsonDiff.jsonDiff.buildJsonDiffSolution
 
 object Main extends App {
 
   val entryJson1 =
     """{
-      |  "zero": "one",
-      |  "first": [
-      |    { "second": "a" },
-      |    { "second": "b" },
-      |    { "second": "c" },
-      |    { "second": "d" },
-      |    { "second": "e" }
+      |  "name": "John",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "renault": "clio" },
+      |    { "audi": "a5" },
+      |    { "ford": "focus" }
       |  ]
       |}""".stripMargin
 
   val entryJson2 =
     """{
-      |  "zero": "one",
-      |  "first": [
-      |    { "second": "a" },
-      |    { "second": "c" },
-      |    { "second": "e" }
+      |  "name": "Jack",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "ford": "focus" }
       |  ]
       |}""".stripMargin
 
-  println(buildSolutionWithDiffson(entryJson1, entryJson2))
+  println(buildJsonDiffSolution(entryJson1, entryJson2))
 
 }

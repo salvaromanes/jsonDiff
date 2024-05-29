@@ -11,16 +11,15 @@ object DiffDiffson {
   def buildSolutionWithDiffson(
                                 text1: String,
                                 text2: String
-                              ): Json = {
+                              ): Either[Json, Json] = {
     val maybeJson1 = parse(text1)
     val maybeJson2 = parse(text2)
 
     (maybeJson1, maybeJson2) match {
       case (Right(v1), Right(v2)) =>
-        val diffs = diffDiffson(v1, v2)
-        Json.obj(("differences", diffs))
+        Right(diffDiffson(v1, v2))
       case _ =>
-        Json.fromString("something was wrong")
+        Left(Json.fromString("Something went wrong"))
     }
   }
 
