@@ -4,7 +4,6 @@ import diffson.DiffDiffson.buildSolutionWithDiffson
 import io.circe._
 import io.circe.parser._
 
-import java.awt.Font
 import scala.annotation.tailrec
 
 object jsonDiff {
@@ -77,8 +76,8 @@ object jsonDiff {
         val originalJson =
           originalValue match {
             case Right(v) =>
-              Json.obj(("oldValue", v))
-//              Json.fromString(Console.RED + v)
+              Json.obj(("_old", v))
+//              Json.obj(("oldValue", Json.fromString(Console.RED + v)))
             case _ =>
               Json.Null
           }
@@ -86,8 +85,8 @@ object jsonDiff {
         val differentJson =
           differentValue match {
             case Right(v) =>
-              Json.obj(("newValue", v))
-//              Json.fromString(Console.GREEN + v)
+              Json.obj(("_new", v))
+//              Json.obj(("newValue", Json.fromString(Console.GREEN + v)))
             case _ =>
               Json.Null
           }
