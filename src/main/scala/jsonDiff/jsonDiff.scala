@@ -8,6 +8,36 @@ import scala.annotation.tailrec
 
 object jsonDiff {
 
+  def printDiffTwoJsonWithColor(
+                        text1: String,
+                        text2: String
+                      ): Unit = {
+    val differencesJson = buildJsonDiffSolution(text1, text2)
+    val diffCursor = differencesJson.hcursor
+
+    val maybeDiffKeys = diffCursor.keys
+
+    for {
+      diffKeys <- maybeDiffKeys
+    } yield {
+      val diffKeyList = diffKeys.toList
+
+      diffKeyList.foreach{key =>
+        val value = diffCursor.downField(key).as[Json]
+        val content = s"${key.substring(0, key.length - 4)} : ${value.getOrElse("empty").toString}"
+
+        key match {
+          case k if k.endsWith("_old") =>
+            println(Console.RED + content)
+          case k if k.endsWith("_new") =>
+            println(Console.GREEN + content)
+          case _ =>
+            println(Console.WHITE + content)
+        }
+      }
+    }
+  }
+
   def buildJsonDiffSolution(
                       text1: String,
                       text2: String
@@ -21,8 +51,6 @@ object jsonDiff {
         maybeOriginalJson match {
           case Right(original) =>
             diffTwoJson(original, differences)
-          case _ =>
-            Json.fromString("Something went wrong")
         }
       case Left(error) =>
         error
@@ -49,8 +77,6 @@ object jsonDiff {
       }
 
     maybeSolution match {
-      case None =>
-        Json.fromString("Something went wrong")
       case Some(value) =>
         value
     }
@@ -73,54 +99,46 @@ object jsonDiff {
         val originalValue = originalCursor.downField(head).as[Json]
         val differentValue = differencesCursor.downField(head).as[Json]
 
-        val originalJson =
-          originalValue match {
-            case Right(v) =>
-              Json.obj(("_old", v))
-//              Json.obj(("oldValue", Json.fromString(Console.RED + v)))
+        val values =
+          (originalValue, differentValue) match {
+            case (Right(v1), Right(v2)) =>
+              Json.obj((s"${head}_old", v1)).deepMerge(Json.obj((s"${head}_new", v2)))
+//              Json.obj(
+//                (head, Json.fromString(Console.RED + v1)),
+//                (head, Json.fromString(Console.GREEN + v2))
+//              )
             case _ =>
               Json.Null
           }
 
-        val differentJson =
-          differentValue match {
-            case Right(v) =>
-              Json.obj(("_new", v))
-//              Json.obj(("newValue", Json.fromString(Console.GREEN + v)))
-            case _ =>
-              Json.Null
-          }
-
-        val json = Json.obj((head, differentJson.deepMerge(originalJson)))
         val outJson =
-          if (jsonSolution.isNull) json
-          else json.deepMerge(jsonSolution)
+          if (jsonSolution.isNull) values
+          else values.deepMerge(jsonSolution)
 
         buildJsonSolution(
           originalCursor, differencesCursor, originalKeys, differencesKeys, tail
-        )(
-          outJson
-        )
+        )(outJson)
       } else {
         val value = originalCursor.downField(head).as[Json]
 
         val json =
           value match {
             case Right(v) =>
-              Json.obj((head, v))
+              Json.obj((s"${head}__eq", v))
+//              Json.obj((head, Json.fromString(Console.WHITE + v)))
             case _ =>
               Json.Null
           }
 
         val outJson =
-          if (jsonSolution.isNull) json
-          else json.deepMerge(jsonSolution)
+          if (jsonSolution.isNull)
+            json
+          else
+            json.deepMerge(jsonSolution)
 
         buildJsonSolution(
           originalCursor, differencesCursor, originalKeys, differencesKeys, tail
-        )(
-          outJson
-        )
+        )(outJson)
       }
   }
 
