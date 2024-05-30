@@ -11,7 +11,8 @@ object Main extends App {
       |    { "renault": "clio" },
       |    { "audi": "a5" },
       |    { "ford": "focus" }
-      |  ]
+      |  ],
+      |  "nationality" : "german"
       |}""".stripMargin
 
   val entryJson2 =
@@ -23,12 +24,6 @@ object Main extends App {
       |    { "ford": "focus" }
       |  ]
       |}""".stripMargin
-
-  // This one show the solution using _old, _new and _eq names for the fields
-
-//  println(buildJsonDiffSolution(entryJson1, entryJson2))
-
-  // This one show the solution using the color pattern (Green = new, Red = old, White = with no changes)
 
   printDiffTwoJsonWithColor(entryJson1, entryJson2)
 

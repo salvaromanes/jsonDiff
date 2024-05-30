@@ -22,20 +22,87 @@ object jsonDiff {
     } yield {
       val diffKeyList = diffKeys.toList
 
-      diffKeyList.foreach{key =>
-        val value = diffCursor.downField(key).as[Json]
-        val content = s"${key.substring(0, key.length - 4)} : ${value.getOrElse("empty").toString}"
+      mapKeyWithListOfValues(diffKeyList, diffCursor)(Map.empty).foreach(m =>
+        println(s"${m._1} : ${m._2.mkString(Console.WHITE + ",")}")
+      )
 
-        key match {
-          case k if k.endsWith("_old") =>
-            println(Console.RED + content)
-          case k if k.endsWith("_new") =>
-            println(Console.GREEN + content)
-          case _ =>
-            println(Console.WHITE + content)
-        }
+      // This line must to be remove -> Provisional
+      println(Console.YELLOW + "\n\nOTHER SOLUTION\n\n")
+
+      printDifferencesByKeys(diffKeyList, diffCursor)
+    }
+  }
+
+  private def printDifferencesByKeys(
+                                      diffKeyList: List[String],
+                                      diffCursor: HCursor
+                                    ): Unit = {
+    diffKeyList.foreach{key =>
+      val value = diffCursor.downField(key).as[Json]
+      val valueString = s"${value.getOrElse("empty").toString}"
+      val keyString = s"${key.substring(0, key.length - 4)} : "
+
+      print(Console.WHITE + keyString)
+      key match {
+        case k if k.endsWith("_old") =>
+          println(Console.RED + valueString)
+        case k if k.endsWith("_new") =>
+          println(Console.GREEN + valueString)
+        case _ =>
+          println(Console.WHITE + valueString)
       }
     }
+  }
+
+  @tailrec
+  private def mapKeyWithListOfValues(
+                                      keysList: List[String],
+                                      cursor: HCursor
+                                    )(
+                                      outputMap: Map[String, List[String]]
+                                    ): Map[String, List[String]] = keysList match {
+    case Nil =>
+      outputMap
+    case head::_ =>
+      head match {
+        case k if k.endsWith("_new") || k.endsWith("_old") =>
+          val key = head.substring(0, head.length - 4)
+          val newValue = cursor.downField(s"${key}_new").as[Json]
+          val oldValue = cursor.downField(s"${key}_old").as[Json]
+
+          val keyString = Console.WHITE + key
+          val listOffValues = List(Console.GREEN + newValue.getOrElse("empty"), Console.RED + oldValue.getOrElse("empty"))
+
+          val index = keysList.indexOf(s"${key}_old") + 1
+          val newKeyList = keysList.drop(index)
+
+          val newOutputMap =
+            outputMap match {
+              case outMap if outMap.isEmpty =>
+                Map(keyString -> listOffValues)
+              case _ =>
+                outputMap.concat(Map(keyString -> listOffValues))
+            }
+
+          mapKeyWithListOfValues(newKeyList, cursor)(newOutputMap)
+        case _ =>
+          val keyString = Console.WHITE + head.substring(0, head.length - 4)
+          val eqValue = cursor.downField(head).as[Json]
+          val listOffValues = List(Console.WHITE + eqValue.getOrElse("empty"))
+
+          val index = keysList.indexOf(s"$head") + 1
+          val newKeyList = keysList.drop(index)
+
+          val newOutputMap =
+            outputMap match {
+              case outMap if outMap.isEmpty =>
+                Map(keyString -> listOffValues)
+              case _ =>
+                outputMap.concat(Map(keyString -> listOffValues))
+            }
+
+          mapKeyWithListOfValues(newKeyList, cursor)(newOutputMap)
+      }
   }
 
   def buildJsonDiffSolution(
@@ -103,10 +170,6 @@ object jsonDiff {
           (originalValue, differentValue) match {
             case (Right(v1), Right(v2)) =>
               Json.obj((s"${head}_old", v1)).deepMerge(Json.obj((s"${head}_new", v2)))
-//              Json.obj(
-//                (head, Json.fromString(Console.RED + v1)),
-//                (head, Json.fromString(Console.GREEN + v2))
-//              )
             case _ =>
               Json.Null
           }
@@ -125,7 +188,6 @@ object jsonDiff {
           value match {
             case Right(v) =>
               Json.obj((s"${head}__eq", v))
-//              Json.obj((head, Json.fromString(Console.WHITE + v)))
             case _ =>
               Json.Null
           }
