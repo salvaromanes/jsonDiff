@@ -118,6 +118,8 @@ object jsonDiff {
         maybeOriginalJson match {
           case Right(original) =>
             diffTwoJson(original, differences)
+          case Left(error) =>
+            Json.fromString(s"Something went wrong trying to get the differences. Error: $error")
         }
       case Left(error) =>
         error
