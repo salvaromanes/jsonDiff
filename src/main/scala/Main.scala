@@ -1,4 +1,4 @@
-import jsonDiff.jsonDiff.printDiffTwoJsonWithColor
+import jsonDiff._
 
 object Main extends App {
 
@@ -6,25 +6,34 @@ object Main extends App {
     """{
       |  "name": "John",
       |  "surname": "Smith",
-      |  "cars": [
-      |    { "audi": "a1" },
-      |    { "renault": "clio" },
-      |    { "audi": "a5" },
-      |    { "ford": "focus" }
-      |  ],
-      |  "nationality" : "german"
+      |  "address": {
+      |    "home" : "C/Here",
+      |    "number" : "123",
+      |    "location" : {
+      |      "town" : "Malaga",
+      |      "city" : "Malaga",
+      |      "country" : "Spain"
+      |    }
+      |  }
       |}""".stripMargin
 
   val entryJson2 =
     """{
       |  "name": "Jack",
       |  "surname": "Smith",
-      |  "cars": [
-      |    { "audi": "a1" },
-      |    { "ford": "focus" }
-      |  ]
+      |  "address": {
+      |    "home" : "C/Here",
+      |    "number" : "123",
+      |    "location" : {
+      |      "town" : "Malaga",
+      |      "city" : "Malaga",
+      |      "country" : "Colombia"
+      |    }
+      |  }
       |}""".stripMargin
 
-  printDiffTwoJsonWithColor(entryJson1, entryJson2)
+//  println(jsonDiff.printDiffTwoJsonWithColor(entryJson1, entryJson2))
+//  println(jsonDiff.buildJsonDiffSolution(entryJson1, entryJson2))
+  println(jsonDiffListOfKeys.buildJsonDiffSolution(entryJson1, entryJson2))
 
 }
