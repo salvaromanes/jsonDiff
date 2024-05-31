@@ -1,29 +1,30 @@
-import diffson.DiffDiffson.buildSolutionWithDiffson
+import jsonDiff.jsonDiff.printDiffTwoJsonWithColor
 
 object Main extends App {
 
   val entryJson1 =
     """{
-      |  "zero": "one",
-      |  "first": [
-      |    { "second": "a" },
-      |    { "second": "b" },
-      |    { "second": "c" },
-      |    { "second": "d" },
-      |    { "second": "e" }
-      |  ]
+      |  "name": "John",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "renault": "clio" },
+      |    { "audi": "a5" },
+      |    { "ford": "focus" }
+      |  ],
+      |  "nationality" : "german"
       |}""".stripMargin
 
   val entryJson2 =
     """{
-      |  "zero": "one",
-      |  "first": [
-      |    { "second": "a" },
-      |    { "second": "c" },
-      |    { "second": "e" }
+      |  "name": "Jack",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "ford": "focus" }
       |  ]
       |}""".stripMargin
 
-  println(buildSolutionWithDiffson(entryJson1, entryJson2))
+  printDiffTwoJsonWithColor(entryJson1, entryJson2)
 
 }
