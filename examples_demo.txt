@@ -23,6 +23,31 @@
       |  ]
       |}""".stripMargin
 
+// Same than first but with nationality change of json
+
+  val entryJson1 =
+    """{
+      |  "name": "John",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "renault": "clio" },
+      |    { "audi": "a5" },
+      |    { "ford": "focus" }
+      |  ]
+      |}""".stripMargin
+
+  val entryJson2 =
+    """{
+      |  "name": "Jack",
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "ford": "focus" }
+      |  ],
+      |  "nationality" : "german"
+      |}""".stripMargin
+
 // Second example -> different nested
 
   val entryJson1 =
@@ -110,3 +135,55 @@
       |    "house number" : "1"
       |  }
       |}""".stripMargin
+
+// Complete example -> I try to write a similar example than Quantexa json
+
+  val entryJson1 =
+    """{
+      |  "name": "John",
+      |  "surname": "Smith",
+      |  "address": {
+      |    "country" : "Spain",
+      |    "town/city" : "Malaga",
+      |    "street" : "Here",
+      |    "postal code" : "1234",
+      |    "house number" : "1"
+      |  },
+      |  "bank data" : {
+      |    "IBAN" : "ES123456789",
+      |    "SWIFT" : "AAAA-BB-CC-123",
+      |    "entity" : "bank 1",
+      |    "location" : {
+      |      "country" : "Spain",
+      |      "town/city" : "Malaga",
+      |      "street" : "There",
+      |      "postal code" : "1234",
+      |      "house number" : "1"
+      |    }
+      |  }
+      |}""".stripMargin
+
+  val entryJson2 =
+      """{
+        |  "name": "Jack",
+        |  "surname": "Smith",
+        |  "address": {
+        |    "country" : "Spain",
+        |    "town/city" : "Malaga",
+        |    "street" : "Here",
+        |    "postal code" : "1234",
+        |    "house number" : "2"
+        |  },
+        |  "bank data" : {
+        |    "IBAN" : "ES987654321",
+        |    "SWIFT" : "AAAA-BB-CC-321",
+        |    "entity" : "bank 2",
+        |    "location" : {
+        |      "country" : "Spain",
+        |      "town/city" : "Malaga",
+        |      "street" : "Here",
+        |      "postal code" : "4321",
+        |      "house number" : "25"
+        |    }
+        |  }
+        |}""".stripMargin
