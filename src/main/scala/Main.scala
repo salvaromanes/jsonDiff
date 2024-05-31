@@ -1,4 +1,4 @@
-import jsonDiff.jsonDiff.{buildJsonDiffSolution, printDiffTwoJsonWithColor}
+import jsonDiff.jsonDiff.printDiffTwoJsonWithColor
 
 object Main extends App {
 

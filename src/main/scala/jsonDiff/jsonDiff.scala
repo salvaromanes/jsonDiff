@@ -109,40 +109,40 @@ object jsonDiff {
                       text1: String,
                       text2: String
                    ): Json = {
-    val maybeDiff = buildSolutionWithDiffson(text1, text2)
+    val maybeDiff = (buildSolutionWithDiffson(text1, text2), buildSolutionWithDiffson(text2, text1))
 
     maybeDiff match {
-      case Right(differences) =>
+      case (Right(differencesOldToNew), Right(differencesNewToOld)) =>
         val maybeOriginalJson = parse(text1)
 
         maybeOriginalJson match {
           case Right(original) =>
-            diffTwoJson(original, differences)
+            diffTwoJson(original, differencesOldToNew, differencesNewToOld)
           case Left(error) =>
-            Json.fromString(s"Something went wrong trying to get the differences. Error: $error")
+            Json.fromString(s"Something went wrong trying to get the differencesOldToNew. Error: $error")
         }
-      case Left(error) =>
-        error
+      case _ =>
+        throw new RuntimeException("Error in buildJsonDiffSolution: Left has been returning")
     }
   }
 
   private def diffTwoJson(
                            original: Json,
-                           differences: Json
+                           differencesOldToNew: Json,
+                           differencesNewToOld: Json
                          ): Json = {
-    val c1 = original.hcursor
-    val c2 = differences.hcursor
-
-    val maybeKeys1 = c1.keys.map(k => k.toList)
-    val maybeKeys2 = c2.keys.map(k => k.toList)
+    val originalCursor = original.hcursor
+    val differencesOldToNewCursor = differencesOldToNew.hcursor
+    val differencesNewToOldCursor = differencesNewToOld.hcursor
 
     val maybeSolution =
       for {
-        keys1 <- maybeKeys1
-        keys2 <- maybeKeys2
+        keys1 <- originalCursor.keys.map(k => k.toList)
+        keys2 <- differencesOldToNewCursor.keys.map(k => k.toList)
+        keys3 <- differencesNewToOldCursor.keys.map(k => k.toList)
       } yield {
-        val allKeys = keys1.concat(keys2).toSet
-        buildJsonSolution(c1, c2, keys1, keys2, allKeys.toList)(Json.Null)
+        val allKeys = keys1.concat(keys2).concat(keys3).toSet
+        buildJsonSolution(originalCursor, differencesOldToNewCursor, differencesNewToOldCursor, keys1, keys2, allKeys.toList)(Json.Null)
       }
 
     maybeSolution match {
@@ -153,11 +153,12 @@ object jsonDiff {
 
   @tailrec
   private def buildJsonSolution(
-                                  originalCursor: HCursor,
-                                  differencesCursor: HCursor,
-                                  originalKeys: List[String],
-                                  differencesKeys: List[String],
-                                  keys: List[String],
+                                 originalCursor: HCursor,
+                                 differencesOldToNewCursor: HCursor,
+                                 differencesNewToOldCursor: HCursor,
+                                 originalKeys: List[String],
+                                 differencesKeys: List[String],
+                                 keys: List[String],
                                )(
                                   jsonSolution: Json
                                 ): Json = keys match {
@@ -165,11 +166,11 @@ object jsonDiff {
       jsonSolution
     case head::tail =>
       if (differencesKeys.contains(head)) {
-        val originalValue = originalCursor.downField(head).as[Json]
-        val differentValue = differencesCursor.downField(head).as[Json]
+        val differentOldToNewValue = differencesOldToNewCursor.downField(head).as[Json]
+        val differentNewToOldValue = differencesNewToOldCursor.downField(head).as[Json]
 
         val values =
-          (originalValue, differentValue) match {
+          (differentNewToOldValue, differentOldToNewValue) match {
             case (Right(v1), Right(v2)) =>
               Json.obj((s"${head}_old", v1)).deepMerge(Json.obj((s"${head}_new", v2)))
             case _ =>
@@ -181,7 +182,7 @@ object jsonDiff {
           else values.deepMerge(jsonSolution)
 
         buildJsonSolution(
-          originalCursor, differencesCursor, originalKeys, differencesKeys, tail
+          originalCursor, differencesOldToNewCursor, differencesNewToOldCursor, originalKeys, differencesKeys, tail
         )(outJson)
       } else {
         val value = originalCursor.downField(head).as[Json]
@@ -201,7 +202,7 @@ object jsonDiff {
             json.deepMerge(jsonSolution)
 
         buildJsonSolution(
-          originalCursor, differencesCursor, originalKeys, differencesKeys, tail
+          originalCursor, differencesOldToNewCursor, differencesNewToOldCursor, originalKeys, differencesKeys, tail
         )(outJson)
       }
   }
