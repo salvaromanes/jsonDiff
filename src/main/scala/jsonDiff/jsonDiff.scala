@@ -25,11 +25,6 @@ object jsonDiff {
       mapKeyWithListOfValues(diffKeyList, diffCursor)(Map.empty).foreach(m =>
         println(s"${m._1} : ${m._2.mkString(Console.WHITE + ",")}")
       )
-
-      // This line must to be remove -> Provisional
-      println(Console.YELLOW + "\n\nOTHER SOLUTION\n\n")
-
-      printDifferencesByKeys(diffKeyList, diffCursor)
     }
   }
 
