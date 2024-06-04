@@ -52,13 +52,14 @@ object DiffDiffsonComplete {
 
       addJson.deepMerge(removeJson).deepMerge(changeJson)
     case head::tail =>
-      val maybeOperation = head.hcursor.downField("op").as[Json]
+      val cursor = head.hcursor
+      val maybeOperation = cursor.downField("op").as[Json]
 
       maybeOperation match {
         case Right(operation) =>
-          val maybePathField = head.hcursor.downField("path").as[Json]
-          val maybeNewField = head.hcursor.downField("value").as[Json]
-          val maybeOldField = head.hcursor.downField("old").as[Json]
+          val maybePathField = cursor.downField("path").as[Json]
+          val maybeNewField = cursor.downField("value").as[Json]
+          val maybeOldField = cursor.downField("old").as[Json]
 
           val listOfJsonDifferences =
             operation match {
