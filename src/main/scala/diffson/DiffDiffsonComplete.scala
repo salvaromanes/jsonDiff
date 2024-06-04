@@ -31,15 +31,41 @@ object DiffDiffsonComplete {
               List()
           }
 
-        buildSolutionWithCorrectFormat(listOfDifferences)(List(), List(), List())
+        val cursor1 = v1.hcursor
+        val keys1 = cursor1.keys.get.toList
+
+        val mapKey = mapKeyWithList(cursor1, keys1)(Map())
+        buildSolutionWithCorrectFormat(listOfDifferences, mapKey)(List(), List(), List())
       case _ =>
         Json.fromString("Something went wrong")
     }
   }
 
   @tailrec
+  private def mapKeyWithList(
+                              cursor: HCursor,
+                              keys: List[String]
+                            )(
+                              outMap: Map[Json, List[Json]]
+                            ): Map[Json, List[Json]] = keys match {
+    case Nil =>
+      outMap
+    case head :: tail =>
+      val keyValue = cursor.downField(head).as[Json]
+
+      keyValue match {
+        case Right(value) if value.isArray =>
+          val newOutMap = outMap.concat(Map(Json.fromString(head) -> value.asArray.get.toList))
+          mapKeyWithList(cursor, tail)(newOutMap)
+        case _ =>
+          mapKeyWithList(cursor, tail)(outMap)
+      }
+  }
+
+  @tailrec
   private def buildSolutionWithCorrectFormat(
-                                              differences: List[Json]
+                                              differences: List[Json],
+                                              mapKeyWithList: Map[Json, List[Json]]
                                             )(
                                               changeList: List[Json],
                                               deleteList: List[Json],
@@ -87,10 +113,25 @@ object DiffDiffsonComplete {
                     pathField <- maybePathField
                     oldField <- maybeOldField
                   } yield {
-                    Json.obj(
-                      ("path", pathField),
-                      ("old", oldField)
-                    )
+                    val stringPath = pathField.toString().substring(2)
+                    val key = stringPath.substring(0, stringPath.indexOf("/"))
+                    val keyJson = Json.fromString(key)
+                    val value = oldField
+
+                    if (mapKeyWithList.contains(keyJson)) {
+                      val keyList = mapKeyWithList(keyJson)
+                      val index = keyList.indexOf(value)
+
+                      Json.obj(
+                        ("path", Json.fromString(s"$key/$index")),
+                        ("old", oldField)
+                      )
+                    } else {
+                      Json.obj(
+                        ("path", pathField),
+                        ("old", oldField)
+                      )
+                    }
                   }
 
                 newElementOfList match {
@@ -115,7 +156,7 @@ object DiffDiffsonComplete {
                 }
             }
 
-          buildSolutionWithCorrectFormat(tail)(listOfJsonDifferences._1, listOfJsonDifferences._2, listOfJsonDifferences._3)
+          buildSolutionWithCorrectFormat(tail, mapKeyWithList)(listOfJsonDifferences._1, listOfJsonDifferences._2, listOfJsonDifferences._3)
         case Left(error) =>
           Json.fromString(error.getMessage())
       }

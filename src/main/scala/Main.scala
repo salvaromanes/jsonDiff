@@ -28,5 +28,37 @@ object Main extends App {
   val value = buildSolutionWithDiffson(entryJson1, entryJson2)
   println(value)
 
+  """
+    |{
+    |  "change" : [
+    |    {
+    |      "path" : "/name",
+    |      "new" : "Jack",
+    |      "old" : "John"
+    |    }
+    |  ],
+    |  "remove" : [
+    |    {
+    |      "path" : "/cars/1",
+    |      "old" : {
+    |        "renault" : "clio"
+    |      }
+    |    },
+    |    {
+    |      "path" : "/cars/2",
+    |      "old" : {
+    |        "audi" : "a5"
+    |      }
+    |    }
+    |  ],
+    |  "add" : [
+    |    {
+    |      "path" : "/nationality",
+    |      "new" : "german"
+    |    }
+    |  ]
+    |}
+    |""".stripMargin
+
 }
 
