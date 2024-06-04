@@ -6,35 +6,59 @@ object Main extends App {
     """{
       |  "name": "John",
       |  "surname": "Smith",
-      |  "address": {
-      |    "country" : "Spain",
-      |    "town/city" : "Malaga",
-      |    "street" : "Here",
-      |    "postal code" : "1234",
-      |    "house number" : "1"
-      |  }
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "renault": "clio" },
+      |    { "ford": "focus" },
+      |    { "audi": "a5" }
+      |  ]
       |}""".stripMargin
 
   val entryJson2 =
     """{
       |  "name": "Jack",
-      |  "surname": "Nick",
-      |  "bank data" : {
-      |    "IBAN" : "ES987654321",
-      |    "SWIFT" : "AAAA-BB-CC-321",
-      |    "entity" : "bank 2",
-      |    "location" : {
-      |      "country" : "Spain",
-      |      "town/city" : "Malaga",
-      |      "street" : "Here",
-      |      "postal code" : "4321",
-      |      "house number" : "25"
-      |    }
-      |  }
+      |  "surname": "Smith",
+      |  "cars": [
+      |    { "audi": "a1" },
+      |    { "ford": "focus" }
+      |  ],
+      |  "nationality" : "german"
       |}""".stripMargin
 
   val value = buildSolutionWithDiffson(entryJson1, entryJson2)
   println(value)
+
+  """
+    |{
+    |  "change" : [
+    |    {
+    |      "path" : "/name",
+    |      "new" : "Jack",
+    |      "old" : "John"
+    |    }
+    |  ],
+    |  "remove" : [
+    |    {
+    |      "path" : "/cars/1",
+    |      "old" : {
+    |        "renault" : "clio"
+    |      }
+    |    },
+    |    {
+    |      "path" : "/cars/2",
+    |      "old" : {
+    |        "audi" : "a5"
+    |      }
+    |    }
+    |  ],
+    |  "add" : [
+    |    {
+    |      "path" : "/nationality",
+    |      "new" : "german"
+    |    }
+    |  ]
+    |}
+    |""".stripMargin
 
 }
 

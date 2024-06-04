@@ -1,5 +1,5 @@
+import diffson.DiffDiffsonComplete.buildSolutionWithDiffson
 import io.circe.Json
-import jsonDiff.jsonDiff.buildJsonDiffSolution
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -19,10 +19,14 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  "first" : "second"
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(("first__eq", Json.fromString("second")))
+      Json.obj(
+        ("change", Json.arr()),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
+      )
     }
 
     actual shouldBe expected
@@ -44,10 +48,14 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  ]
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(("first__eq", Json.arr(Json.fromString("second"))))
+      Json.obj(
+        ("change", Json.arr()),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
+      )
     }
 
     actual shouldBe expected
@@ -69,10 +77,14 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
-      Json.obj(("first__eq", Json.obj(("second", Json.fromString("zubehor")))))
+      Json.obj(
+        ("change", Json.arr()),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
+      )
     }
 
     actual shouldBe expected
@@ -92,12 +104,19 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  "first" : "third"
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("first_new", Json.fromString("third")),
-        ("first_old", Json.fromString("second"))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/first")),
+            ("new", Json.fromString("third")),
+            ("old", Json.fromString("second"))
+          )
+        )),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
       )
     }
 
@@ -116,12 +135,19 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  "first" : ["third"]
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("first_new", Json.arr(Json.fromString("third"))),
-        ("first_old", Json.arr(Json.fromString("second")))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/first/0")),
+            ("new", Json.fromString("third")),
+            ("old", Json.fromString("second"))
+          )
+        )),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
       )
     }
 
@@ -144,12 +170,19 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("first_new", Json.obj(("second", Json.fromString("bye")))),
-        ("first_old", Json.obj(("second", Json.fromString("hello"))))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/first/second")),
+            ("new", Json.fromString("bye")),
+            ("old", Json.fromString("hello"))
+          )
+        )),
+        ("remove", Json.arr()),
+        ("add", Json.arr())
       )
     }
 
@@ -174,14 +207,29 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  "third" : "bye"
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("first_new", Json.Null),
-        ("first_old", Json.fromString("hello")),
-        ("second_new", Json.obj(("second", Json.fromString("bye")))),
-        ("second_old", Json.obj(("second", Json.fromString("hello"))))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/second/second")),
+            ("new", Json.fromString("bye")),
+            ("old", Json.fromString("hello"))
+          )
+        )),
+        ("remove", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/first")),
+            ("old", Json.fromString("hello"))
+          )
+        )),
+        ("add", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/third")),
+            ("new", Json.fromString("bye"))
+          )
+        ))
       )
     }
 
@@ -213,25 +261,36 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  ]
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("name_new", Json.fromString("Jack")),
-        ("name_old", Json.fromString("John")),
-        ("surname__eq", Json.fromString("Smith")),
-        ("cars_new", Json.arr(
-          Json.obj(("audi", Json.fromString("a1"))),
-          Json.obj(("ford", Json.fromString("focus")))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/name")),
+            ("new", Json.fromString("Jack")),
+            ("old", Json.fromString("John"))
+          )
         )),
-        ("cars_old", Json.arr(
-          Json.obj(("audi", Json.fromString("a1"))),
-          Json.obj(("renault", Json.fromString("clio"))),
-          Json.obj(("audi", Json.fromString("a5"))),
-          Json.obj(("ford", Json.fromString("focus")))
+        ("remove", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/cars/2")),
+            ("old", Json.obj(
+              ("audi", Json.fromString("a5"))
+            ))
+          ),
+          Json.obj(
+            ("path", Json.fromString("/cars/1")),
+            ("old", Json.obj(
+              ("renault", Json.fromString("clio"))
+            ))
+          ),
+          Json.obj(
+            ("path", Json.fromString("/nationality")),
+            ("old", Json.fromString("German"))
+          )
         )),
-        ("nationality_new", Json.Null),
-        ("nationality_old", Json.fromString("German"))
+        ("add", Json.arr())
       )
     }
 
@@ -270,25 +329,24 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    val actual = buildJsonDiffSolution(entryJson1, entryJson2)
+    val actual = buildSolutionWithDiffson(entryJson1, entryJson2)
 
     val expected = {
       Json.obj(
-        ("name_new", Json.fromString("Jack")),
-        ("name_old", Json.fromString("John")),
-        ("surname__eq", Json.fromString("Smith")),
-        ("address_new", Json.obj(
-          ("location", Json.obj(("country", Json.fromString("Colombia"))))
+        ("change", Json.arr(
+          Json.obj(
+            ("path", Json.fromString("/name")),
+            ("new", Json.fromString("Jack")),
+            ("old", Json.fromString("John"))
+          ),
+          Json.obj(
+            ("path", Json.fromString("/address/location/country")),
+            ("new", Json.fromString("Colombia")),
+            ("old", Json.fromString("Spain"))
+          )
         )),
-        ("address_old", Json.obj(
-          ("home", Json.fromString("C/Here")),
-          ("number", Json.fromString("123")),
-          ("location", Json.obj(
-            ("town", Json.fromString("Malaga")),
-            ("city", Json.fromString("Malaga")),
-            ("country", Json.fromString("Spain"))
-          ))
-        ))
+        ("remove", Json.arr()),
+        ("add", Json.arr())
       )
     }
 
