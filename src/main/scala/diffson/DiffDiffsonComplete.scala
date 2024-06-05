@@ -41,7 +41,6 @@ object DiffDiffsonComplete {
     }
   }
 
-  @tailrec
   private def mapKeyWithList(
                               cursor: HCursor,
                               keys: List[String]
@@ -57,10 +56,16 @@ object DiffDiffsonComplete {
         case Right(value) if value.isArray =>
           val newOutMap = outMap.concat(Map(Json.fromString(head) -> value.asArray.get.toList))
           mapKeyWithList(cursor, tail)(newOutMap)
+        case Right(value) =>
+          val newCursor = value.hcursor
+          val newKeys = value.hcursor.keys.getOrElse(List()).toList
+          val newOutMap = mapKeyWithList(newCursor, newKeys)(outMap)
+          mapKeyWithList(cursor, tail)(newOutMap)
         case _ =>
           mapKeyWithList(cursor, tail)(outMap)
       }
   }
+
 
   @tailrec
   private def buildSolutionWithCorrectFormat(
@@ -96,11 +101,39 @@ object DiffDiffsonComplete {
                     newField <- maybeNewField
                     oldField <- maybeOldField
                   } yield {
-                    Json.obj(
-                      ("path", pathField),
-                      ("new", newField),
-                      ("old", oldField)
-                    )
+                    val stringPath = pathField.toString().substring(2)
+
+                    val keyRegexWithNumbers = "([^/]+)/[0-9]+".r
+                    val keyRegexOnlyLetters = "[a-zA-Z]+".r
+
+                    val keyWithNumber = keyRegexWithNumbers.findAllIn(stringPath).mkString
+                    val key = keyRegexOnlyLetters.findAllIn(keyWithNumber).mkString
+
+                    val keyJson = Json.fromString(key)
+                    val value = oldField
+
+                    if (mapKeyWithList.contains(keyJson)) {
+                      val regexForKey = "[a-zA-Z/]".r
+
+                      val keyList = mapKeyWithList(keyJson)
+                      val index = keyList.indexOf(value)
+                      val stringKey = regexForKey.findAllIn(stringPath).mkString
+
+                      Json.obj(
+                        ("path", Json.fromString(s"${stringKey.replace("/", ".")}[$index]")),
+                        ("new", newField),
+                        ("old", oldField)
+                      )
+                    } else {
+                      val pathString = pathField.toString()
+                      val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
+                      Json.obj(
+                        ("path", jsonPath),
+                        ("new", newField),
+                        ("old", oldField)
+                      )
+                    }
                   }
 
                 newElementOfList match {
@@ -114,21 +147,33 @@ object DiffDiffsonComplete {
                     oldField <- maybeOldField
                   } yield {
                     val stringPath = pathField.toString().substring(2)
-                    val key = stringPath.substring(0, stringPath.indexOf("/"))
+
+                    val keyRegexWithNumbers = "([^/]+)/[0-9]+".r
+                    val keyRegexOnlyLetters = "[a-zA-Z]+".r
+
+                    val keyWithNumber = keyRegexWithNumbers.findAllIn(stringPath).mkString
+                    val key = keyRegexOnlyLetters.findAllIn(keyWithNumber).mkString
+
                     val keyJson = Json.fromString(key)
                     val value = oldField
 
                     if (mapKeyWithList.contains(keyJson)) {
+                      val regexForKey = "[a-zA-Z/]".r
+
                       val keyList = mapKeyWithList(keyJson)
                       val index = keyList.indexOf(value)
+                      val stringKey = regexForKey.findAllIn(stringPath).mkString
 
                       Json.obj(
-                        ("path", Json.fromString(s"$key/$index")),
+                        ("path", Json.fromString(s"${stringKey.replace("/", ".")}[$index]")),
                         ("old", oldField)
                       )
                     } else {
+                      val pathString = pathField.toString()
+                      val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
                       Json.obj(
-                        ("path", pathField),
+                        ("path", jsonPath),
                         ("old", oldField)
                       )
                     }
@@ -144,8 +189,11 @@ object DiffDiffsonComplete {
                     pathField <- maybePathField
                     newField <- maybeNewField
                   } yield {
+                    val pathString = pathField.toString()
+                    val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
                     Json.obj(
-                      ("path", pathField),
+                      ("path", jsonPath),
                       ("new", newField)
                     )
                   }

@@ -6,59 +6,35 @@ object Main extends App {
     """{
       |  "name": "John",
       |  "surname": "Smith",
-      |  "cars": [
-      |    { "audi": "a1" },
-      |    { "renault": "clio" },
-      |    { "ford": "focus" },
-      |    { "audi": "a5" }
-      |  ]
+      |  "transport" : {
+      |    "street" : {
+      |      "cars": [
+      |        { "audi": "a1" },
+      |        { "renault": "clio" },
+      |        { "ford": "focus" },
+      |        { "audi": "a5" }
+      |      ]
+      |    }
+      |  }
       |}""".stripMargin
 
   val entryJson2 =
     """{
       |  "name": "Jack",
       |  "surname": "Smith",
-      |  "cars": [
-      |    { "audi": "a1" },
-      |    { "ford": "focus" }
-      |  ],
+      |  "transport" : {
+      |    "street" : {
+      |      "cars": [
+      |        { "audi": "a1" },
+      |        { "ford": "focus" }
+      |      ]
+      |    }
+      |  },
       |  "nationality" : "german"
       |}""".stripMargin
 
   val value = buildSolutionWithDiffson(entryJson1, entryJson2)
   println(value)
-
-  """
-    |{
-    |  "change" : [
-    |    {
-    |      "path" : "/name",
-    |      "new" : "Jack",
-    |      "old" : "John"
-    |    }
-    |  ],
-    |  "remove" : [
-    |    {
-    |      "path" : "/cars/1",
-    |      "old" : {
-    |        "renault" : "clio"
-    |      }
-    |    },
-    |    {
-    |      "path" : "/cars/2",
-    |      "old" : {
-    |        "audi" : "a5"
-    |      }
-    |    }
-    |  ],
-    |  "add" : [
-    |    {
-    |      "path" : "/nationality",
-    |      "new" : "german"
-    |    }
-    |  ]
-    |}
-    |""".stripMargin
 
 }
 
