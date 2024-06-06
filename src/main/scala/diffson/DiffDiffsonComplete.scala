@@ -95,7 +95,7 @@ object DiffDiffsonComplete {
           val listOfJsonDifferences =
             operation match {
               case op if op.equals(Json.fromString("replace")) =>
-                val newElementOfList =
+                val newElementForTheList =
                   for {
                     pathField <- maybePathField
                     newField <- maybeNewField
@@ -135,12 +135,12 @@ object DiffDiffsonComplete {
                     }
                   }
 
-                newElementOfList match {
+                newElementForTheList match {
                   case Right(value) =>
                     (changeList ++ List(value), deleteList, addList)
                 }
               case op if op.equals(Json.fromString("remove")) =>
-                val newElementOfList =
+                val newElementForTheList =
                   for {
                     pathField <- maybePathField
                     oldField <- maybeOldField
@@ -177,12 +177,12 @@ object DiffDiffsonComplete {
                     }
                   }
 
-                newElementOfList match {
+                newElementForTheList match {
                   case Right(value) =>
                     (changeList, deleteList ++ List(value), addList)
                 }
               case op if op.equals(Json.fromString("add")) =>
-                val newElementOfList =
+                val newElementForTheList =
                   for {
                     pathField <- maybePathField
                     newField <- maybeNewField
@@ -225,7 +225,7 @@ object DiffDiffsonComplete {
                     }
                   }
 
-                newElementOfList match {
+                newElementForTheList match {
                   case Right(value) =>
                     (changeList, deleteList, addList ++ List(value))
                 }
