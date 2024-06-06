@@ -1,8 +1,4 @@
-import diffson._
-import diffson.lcs._
-import diffson.circe._
-import diffson.jsonpatch._
-import diffson.jsonpatch.lcsdiff.remembering._
+package old
 
 import io.circe._
 import io.circe.parser._

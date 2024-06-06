@@ -1,4 +1,4 @@
-import diffson.DiffDiffsonComplete.buildSolutionWithDiffson
+import diffson.DiffDiffson.buildSolutionWithDiffson
 
 object Main extends App {
 

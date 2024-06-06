@@ -1,4 +1,4 @@
-package json4s
+package old.json4s
 
 import org.json4s.JsonAST.JValue
 import org.json4s.native.JsonMethods._

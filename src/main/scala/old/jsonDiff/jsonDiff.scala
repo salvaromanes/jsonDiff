@@ -1,6 +1,6 @@
-package jsonDiff
+package old.jsonDiff
 
-import diffson.DiffDiffson.buildSolutionWithDiffson
+import old.diffson.DiffDiffson.buildSolutionWithDiffson
 import io.circe._
 import io.circe.parser._
 

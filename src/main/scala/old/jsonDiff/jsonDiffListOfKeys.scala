@@ -1,6 +1,6 @@
-package jsonDiff
+package old.jsonDiff
 
-import diffson.DiffDiffson.buildSolutionWithDiffson
+import old.diffson.DiffDiffson.buildSolutionWithDiffson
 import io.circe.Json
 
 import scala.annotation.tailrec

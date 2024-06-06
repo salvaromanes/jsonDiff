@@ -1,4 +1,4 @@
-import diffson.DiffDiffsonComplete.buildSolutionWithDiffson
+import diffson.DiffDiffson.buildSolutionWithDiffson
 import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
