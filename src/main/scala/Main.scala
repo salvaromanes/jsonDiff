@@ -6,30 +6,30 @@ object Main extends App {
     """{
       |  "name": "John",
       |  "surname": "Smith",
-      |  "transport" : {
-      |    "street" : {
+      |  "transport" : [{
+      |    "street" : [{
       |      "cars": [
       |        { "audi": "a1" },
       |        { "renault": "clio" },
       |        { "ford": "focus" },
       |        { "audi": "a5" }
       |      ]
-      |    }
-      |  }
+      |    }]
+      |  }]
       |}""".stripMargin
 
   val entryJson2 =
     """{
       |  "name": "Jack",
       |  "surname": "Smith",
-      |  "transport" : {
-      |    "street" : {
+      |  "transport" : [{
+      |    "street" : [{
       |      "cars": [
       |        { "audi": "a1" },
       |        { "ford": "focus" }
       |      ]
-      |    }
-      |  },
+      |    }]
+      |  }],
       |  "nationality" : "german"
       |}""".stripMargin
 
