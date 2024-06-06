@@ -41,7 +41,6 @@ object DiffDiffsonComplete {
     }
   }
 
-  @tailrec
   private def mapKeyWithList(
                               cursor: HCursor,
                               keys: List[String]
@@ -57,10 +56,16 @@ object DiffDiffsonComplete {
         case Right(value) if value.isArray =>
           val newOutMap = outMap.concat(Map(Json.fromString(head) -> value.asArray.get.toList))
           mapKeyWithList(cursor, tail)(newOutMap)
+        case Right(value) =>
+          val newCursor = value.hcursor
+          val newKeys = value.hcursor.keys.getOrElse(List()).toList
+          val newOutMap = mapKeyWithList(newCursor, newKeys)(outMap)
+          mapKeyWithList(cursor, tail)(newOutMap)
         case _ =>
           mapKeyWithList(cursor, tail)(outMap)
       }
   }
+
 
   @tailrec
   private def buildSolutionWithCorrectFormat(
@@ -90,67 +95,137 @@ object DiffDiffsonComplete {
           val listOfJsonDifferences =
             operation match {
               case op if op.equals(Json.fromString("replace")) =>
-                val newElementOfList =
+                val newElementForTheList =
                   for {
                     pathField <- maybePathField
                     newField <- maybeNewField
                     oldField <- maybeOldField
                   } yield {
-                    Json.obj(
-                      ("path", pathField),
-                      ("new", newField),
-                      ("old", oldField)
-                    )
-                  }
+                    val keyRegexForAllKeyWithSeparator = "[a-zA-Z]+/".r
+                    val keyRegexForKeys = "[a-zA-Z]+".r
+                    val allKeysWithSeparator = keyRegexForAllKeyWithSeparator.findAllIn(pathField.toString()).mkString
+                    val keyList = keyRegexForKeys.findAllIn(allKeysWithSeparator).toList
 
-                newElementOfList match {
-                  case Right(value) =>
-                    (changeList ++ List(value), deleteList, addList)
-                }
-              case op if op.equals(Json.fromString("remove")) =>
-                val newElementOfList =
-                  for {
-                    pathField <- maybePathField
-                    oldField <- maybeOldField
-                  } yield {
-                    val stringPath = pathField.toString().substring(2)
-                    val key = stringPath.substring(0, stringPath.indexOf("/"))
-                    val keyJson = Json.fromString(key)
-                    val value = oldField
+                    val (keyJson, value) =
+                      keyList match {
+                        case kl if kl.isEmpty =>
+                          val regexForKeyJson = keyRegexForKeys.findAllIn(pathField.toString()).mkString
+                          (Json.fromString(regexForKeyJson), oldField)
+                        case _ =>
+                          (Json.fromString(keyList.last), oldField)
+                      }
 
                     if (mapKeyWithList.contains(keyJson)) {
-                      val keyList = mapKeyWithList(keyJson)
-                      val index = keyList.indexOf(value)
+                      val index = mapKeyWithList(keyJson).indexOf(value)
 
                       Json.obj(
-                        ("path", Json.fromString(s"$key/$index")),
+                        ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+                        ("new", newField),
                         ("old", oldField)
                       )
                     } else {
+                      val pathString = pathField.toString()
+                      val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
                       Json.obj(
-                        ("path", pathField),
+                        ("path", jsonPath),
+                        ("new", newField),
                         ("old", oldField)
                       )
                     }
                   }
 
-                newElementOfList match {
+                newElementForTheList match {
+                  case Right(value) =>
+                    (changeList ++ List(value), deleteList, addList)
+                }
+              case op if op.equals(Json.fromString("remove")) =>
+                val newElementForTheList =
+                  for {
+                    pathField <- maybePathField
+                    oldField <- maybeOldField
+                  } yield {
+                    val keyRegexForAllKeyWithSeparator = "[a-zA-Z]+/".r
+                    val keyRegexForKeys = "[a-zA-Z]+".r
+                    val allKeysWithSeparator = keyRegexForAllKeyWithSeparator.findAllIn(pathField.toString()).mkString
+                    val keyList = keyRegexForKeys.findAllIn(allKeysWithSeparator).toList
+
+                    val (keyJson, value) =
+                      keyList match {
+                        case kl if kl.isEmpty =>
+                          val regexForKeyJson = keyRegexForKeys.findAllIn(pathField.toString()).mkString
+                          (Json.fromString(regexForKeyJson), oldField)
+                        case _ =>
+                          (Json.fromString(keyList.last), oldField)
+                      }
+
+                    if (mapKeyWithList.contains(keyJson)) {
+                      val index = mapKeyWithList(keyJson).indexOf(value)
+
+                      Json.obj(
+                        ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+                        ("old", oldField)
+                      )
+                    } else {
+                      val pathString = pathField.toString()
+                      val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
+                      Json.obj(
+                        ("path", jsonPath),
+                        ("old", oldField)
+                      )
+                    }
+                  }
+
+                newElementForTheList match {
                   case Right(value) =>
                     (changeList, deleteList ++ List(value), addList)
                 }
               case op if op.equals(Json.fromString("add")) =>
-                val newElementOfList =
+                val newElementForTheList =
                   for {
                     pathField <- maybePathField
                     newField <- maybeNewField
                   } yield {
-                    Json.obj(
-                      ("path", pathField),
-                      ("new", newField)
-                    )
+                    val keyRegexForAllKeyWithSeparator = "[a-zA-Z]+/".r
+                    val keyRegexForKeys = "[a-zA-Z]+".r
+                    val allKeysWithSeparator = keyRegexForAllKeyWithSeparator.findAllIn(pathField.toString()).mkString
+                    val keyList = keyRegexForKeys.findAllIn(allKeysWithSeparator).toList
+
+                    val (keyJson, value) =
+                      keyList match {
+                        case kl if kl.isEmpty =>
+                          val regexForKeyJson = keyRegexForKeys.findAllIn(pathField.toString()).mkString
+                          (Json.fromString(regexForKeyJson), newField)
+                        case _ =>
+                          (Json.fromString(keyList.last), newField)
+                      }
+
+                    if (mapKeyWithList.contains(keyJson)) {
+                      val index =
+                        mapKeyWithList(keyJson).indexOf(value) match {
+                          case i if i == -1 =>
+                            mapKeyWithList(keyJson).length
+                          case i =>
+                            i
+                        }
+
+                      Json.obj(
+                        ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+                        ("new", newField)
+                      )
+                    } else {
+                      val pathString = pathField.toString()
+                      val jsonPath = Json.fromString(pathString.substring(2, pathString.length - 1).replace("/", "."))
+
+                      Json.obj(
+                        ("path", jsonPath),
+                        ("new", newField)
+                      )
+                    }
                   }
 
-                newElementOfList match {
+                newElementForTheList match {
                   case Right(value) =>
                     (changeList, deleteList, addList ++ List(value))
                 }

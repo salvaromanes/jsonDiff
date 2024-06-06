@@ -110,7 +110,7 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/first")),
+            ("path", Json.fromString("first")),
             ("new", Json.fromString("third")),
             ("old", Json.fromString("second"))
           )
@@ -141,7 +141,7 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/first/0")),
+            ("path", Json.fromString("first.[0]")),
             ("new", Json.fromString("third")),
             ("old", Json.fromString("second"))
           )
@@ -176,7 +176,7 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/first/second")),
+            ("path", Json.fromString("first.second")),
             ("new", Json.fromString("bye")),
             ("old", Json.fromString("hello"))
           )
@@ -213,20 +213,20 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/second/second")),
+            ("path", Json.fromString("second.second")),
             ("new", Json.fromString("bye")),
             ("old", Json.fromString("hello"))
           )
         )),
         ("remove", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/first")),
+            ("path", Json.fromString("first")),
             ("old", Json.fromString("hello"))
           )
         )),
         ("add", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/third")),
+            ("path", Json.fromString("third")),
             ("new", Json.fromString("bye"))
           )
         ))
@@ -267,26 +267,26 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/name")),
+            ("path", Json.fromString("name")),
             ("new", Json.fromString("Jack")),
             ("old", Json.fromString("John"))
           )
         )),
         ("remove", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/cars/2")),
+            ("path", Json.fromString("cars.[2]")),
             ("old", Json.obj(
               ("audi", Json.fromString("a5"))
             ))
           ),
           Json.obj(
-            ("path", Json.fromString("/cars/1")),
+            ("path", Json.fromString("cars.[1]")),
             ("old", Json.obj(
               ("renault", Json.fromString("clio"))
             ))
           ),
           Json.obj(
-            ("path", Json.fromString("/nationality")),
+            ("path", Json.fromString("nationality")),
             ("old", Json.fromString("German"))
           )
         )),
@@ -335,12 +335,12 @@ class DiffTestJsonDiff extends AnyFlatSpec with Matchers {
       Json.obj(
         ("change", Json.arr(
           Json.obj(
-            ("path", Json.fromString("/name")),
+            ("path", Json.fromString("name")),
             ("new", Json.fromString("Jack")),
             ("old", Json.fromString("John"))
           ),
           Json.obj(
-            ("path", Json.fromString("/address/location/country")),
+            ("path", Json.fromString("address.location.country")),
             ("new", Json.fromString("Colombia")),
             ("old", Json.fromString("Spain"))
           )
