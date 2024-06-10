@@ -1,4 +1,4 @@
-package old.diffson
+package diffson
 
 import io.circe.Json
 
@@ -98,7 +98,7 @@ object FormatBuilder {
         val index = mapKeyWithList(keyJson).indexOf(value)
 
         Json.obj(
-          ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+          ("path", Json.fromString(s"${keyList.mkString(".")}[$index]")),
           ("new", newField),
           ("old", oldField)
         )
@@ -146,7 +146,7 @@ object FormatBuilder {
         val index = mapKeyWithList(keyJson).indexOf(value)
 
         Json.obj(
-          ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+          ("path", Json.fromString(s"${keyList.mkString(".")}[$index]")),
           ("old", oldField)
         )
       } else {
@@ -192,7 +192,7 @@ object FormatBuilder {
         val index = mapKeyWithList(keyJson).indexOf(value)
 
         Json.obj(
-          ("path", Json.fromString(s"${keyList.mkString(".")}.[$index]")),
+          ("path", Json.fromString(s"${keyList.mkString(".")}[$index]")),
           ("new", newField)
         )
       } else {

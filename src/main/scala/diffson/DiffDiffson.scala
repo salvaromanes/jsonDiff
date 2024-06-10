@@ -1,12 +1,12 @@
 package diffson
 
+import diffson.FormatBuilder.buildSolutionWithCorrectFormat
 import diffson.circe._
 import diffson.jsonpatch._
 import diffson.jsonpatch.lcsdiff.remembering._
 import diffson.lcs._
 import io.circe._
 import io.circe.parser._
-import old.diffson.FormatBuilder.buildSolutionWithCorrectFormat
 
 object DiffDiffson {
 
@@ -54,9 +54,26 @@ object DiffDiffson {
     case head :: tail =>
       cursor.downField(head).as[Json] match {
         case Right(value) if value.isArray =>
-          val newOutMap = outMap.concat(
-            Map(Json.fromString(head) -> value.asArray.get.toList)
-          )
+          val newCursor = value.asArray.get.toList.head.hcursor
+          val newKeys = newCursor.keys.getOrElse(List()).toList
+
+          val newOutMap =
+            if (newKeys.nonEmpty) {
+              mapKeyForIndexedLists(
+                newCursor,
+                newKeys
+              )(
+                Map(
+                  outMap.head._1.deepMerge(Json.fromString(s".$head")) -> List()
+                )
+              )
+            } else {
+              Map(
+                outMap.head._1.deepMerge(
+                  Json.fromString(s".$head")
+                ) -> value.asArray.get.toList
+              )
+            }
 
           mapKeyWithList(cursor, tail)(newOutMap)
         case Right(value) =>
@@ -67,6 +84,40 @@ object DiffDiffson {
           mapKeyWithList(cursor, tail)(newOutMap)
         case _ =>
           mapKeyWithList(cursor, tail)(outMap)
+      }
+  }
+
+  private def mapKeyForIndexedLists(
+      cursor: HCursor,
+      listOfKeys: List[String]
+  )(
+      outMap: Map[Json, List[Json]]
+  ): Map[Json, List[Json]] = listOfKeys match {
+    case Nil =>
+      outMap
+    case head :: _ =>
+      val maybeValue = cursor.downField(head).as[Json]
+
+      val newOutMap =
+        for {
+          value <- maybeValue
+        } yield {
+          val newCursor = value.hcursor
+          val keys = newCursor.keys.getOrElse(List()).toList
+
+          mapKeyForIndexedLists(
+            newCursor,
+            keys
+          )(
+            Map(outMap.head._1.deepMerge(Json.fromString(head)) -> List())
+          )
+        }
+
+      newOutMap match {
+        case Right(map) =>
+          map
+        case Left(_) =>
+          Map.empty
       }
   }
 
